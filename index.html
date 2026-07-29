@@ -286,6 +286,36 @@ section.tall{scroll-snap-stop:normal}
 .tracks li.on .t{color:#fff;text-shadow:var(--glow-n)}
 .tracks li.on .no{color:var(--noah)}
 
+/* 재생 컨트롤 */
+.ctrl{margin-top:26px}
+.bar{height:3px;border-radius:2px;background:rgba(255,255,255,.16);cursor:pointer;position:relative}
+.bar::before{content:'';position:absolute;inset:-9px 0}   /* 클릭 여유 */
+.fill{height:100%;width:0;border-radius:2px;position:relative;
+  background:linear-gradient(90deg,var(--noah),var(--apo));
+  box-shadow:0 0 12px rgba(132,192,245,.6)}
+.fill::after{content:'';position:absolute;right:-4px;top:50%;width:8px;height:8px;
+  border-radius:50%;background:#fff;transform:translateY(-50%);
+  box-shadow:var(--glow-w);opacity:0;transition:opacity .3s var(--ease)}
+.bar:hover .fill::after,.ctrl.playing .fill::after{opacity:1}
+.time{display:flex;justify-content:space-between;margin-top:9px;
+  font-family:var(--lat);font-size:11px;letter-spacing:.18em;
+  color:var(--mist,rgba(255,255,255,.62))}
+.btns{display:flex;align-items:center;gap:22px;margin-top:16px}
+.btns button{width:30px;height:30px;display:grid;place-items:center;position:relative;
+  opacity:.65;transition:.35s var(--ease)}
+.btns button:hover{opacity:1;filter:drop-shadow(0 0 8px rgba(255,255,255,.65))}
+.btns svg{width:17px;height:17px;fill:#fff}
+.btns .big{width:40px;height:40px;border-radius:50%;opacity:1;
+  border:1px solid rgba(255,255,255,.35)}
+.btns .big svg{width:15px;height:15px}
+.btns .big:hover{border-color:var(--noah);box-shadow:var(--glow-n)}
+#btnRepeat{opacity:.32}
+#btnRepeat.on{opacity:1;color:var(--noah);filter:drop-shadow(0 0 9px rgba(132,192,245,.8))}
+#btnRepeat svg{fill:none;stroke:currentColor;width:18px;height:18px}
+#btnRepeat em{position:absolute;right:-1px;bottom:-2px;font-family:var(--lat);
+  font-size:9px;font-style:normal;letter-spacing:0;display:none}
+#btnRepeat.one em{display:block}
+
 /* ═══════════ 6. ARCHIVE ═══════════ */
 .archive{padding:14vh 0 0;justify-content:center;gap:34px;overflow:hidden}
 .arc-head{text-align:center;padding:0 6vw}
@@ -472,6 +502,31 @@ footer{width:100%;text-align:center;padding:9vh 0 5vh;
       <div class="rise">
         <p class="eyebrow" style="display:block;margin-bottom:26px">PLAYLIST</p>
         <ul class="tracks" id="tracks"><!-- JS로 생성 --></ul>
+
+        <!-- 재생 컨트롤 -->
+        <div class="ctrl">
+          <div class="bar" id="bar"><div class="fill" id="fill"></div></div>
+          <div class="time"><span id="tCur">0:00</span><span id="tDur">0:00</span></div>
+          <div class="btns">
+            <button id="btnPrev" title="이전 곡" aria-label="이전 곡">
+              <svg viewBox="0 0 24 24"><path d="M18 5v14L8 12z"/><rect x="5" y="5" width="1.8" height="14"/></svg>
+            </button>
+            <button id="btnPlay" class="big" title="재생 / 멈추기" aria-label="재생">
+              <svg id="icPlay" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>
+              <svg id="icPause" viewBox="0 0 24 24" style="display:none"><rect x="6" y="4.5" width="4" height="15"/><rect x="14" y="4.5" width="4" height="15"/></svg>
+            </button>
+            <button id="btnNext" title="다음 곡" aria-label="다음 곡">
+              <svg viewBox="0 0 24 24"><path d="M6 5v14l10-7z"/><rect x="17.2" y="5" width="1.8" height="14"/></svg>
+            </button>
+            <button id="btnRepeat" title="반복 : 전체" aria-label="반복">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <path d="M4 9V7.5A2.5 2.5 0 0 1 6.5 5H17"/><path d="M14.5 2.5 17.5 5l-3 2.5"/>
+                <path d="M20 15v1.5a2.5 2.5 0 0 1-2.5 2.5H7"/><path d="M9.5 21.5 6.5 19l3-2.5"/>
+              </svg>
+              <em id="repOne">1</em>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -500,11 +555,16 @@ footer{width:100%;text-align:center;padding:9vh 0 5vh;
 
 <!-- 유튜브 재생용 (화면 밖에 숨겨진 플레이어) -->
 <div id="ytFrame" style="position:fixed;left:-9999px;top:0;width:240px;height:135px;opacity:0;pointer-events:none"></div>
+<div id="ytBgmFrame" style="position:fixed;left:-9999px;top:0;width:240px;height:135px;opacity:0;pointer-events:none"></div>
 
 <script>
 /* ══════════════════════════════════════════════════════
    0. 수정 포인트 — 파일명 / 텍스트는 여기만 고치면 됩니다
    ══════════════════════════════════════════════════════ */
+/* ★ 배경음악
+   유튜브로 틀려면 BGM_YT에 영상 ID 11자리를 넣으세요 (v= 뒤 부분).
+   BGM_YT가 비어 있을 때만 BGM_SRC의 음원 파일을 재생합니다.          */
+const BGM_YT  = '';               // 예: 'jfKfPfyJRdk'
 const BGM_SRC = 'just stay.wav';
 
 const STANDS = {
@@ -685,13 +745,29 @@ document.querySelectorAll('section[data-veil]').forEach(s=>veilIO.observe(s));
 /* ══════════════════════════════════════════════════════
    5. 배경음악 ♫
    ══════════════════════════════════════════════════════ */
-const bgm = new Audio(BGM_SRC);
-bgm.loop = true; bgm.volume = .55;
+const bgmAudio = new Audio();                       // 파일용 (BGM_YT가 비었을 때만)
+bgmAudio.loop = true; bgmAudio.volume = .55;
+if(!BGM_YT) bgmAudio.src = BGM_SRC;
 const musicBtn = document.getElementById('musicBtn');
-musicBtn.addEventListener('click',()=>{
-  if(bgm.paused){ stopAll(); syncTracks(-1); bgm.play().catch(()=>{}); musicBtn.classList.add('on'); }
-  else { bgm.pause(); musicBtn.classList.remove('on'); }
-});
+let bgmOn = false;
+
+function bgmPlay(){
+  stopTrack();                                     // 플레이리스트와 절대 겹치지 않게
+  if(BGM_YT){
+    if(!ytBgmReady){ bgmWanted = true; }
+    else { ytBgm.loadVideoById(BGM_YT); }
+  }else{
+    bgmAudio.play().catch(()=>{});
+  }
+  bgmOn = true; musicBtn.classList.add('on');
+}
+function bgmStop(){
+  bgmWanted = false;
+  if(BGM_YT){ if(ytBgmReady) ytBgm.pauseVideo(); }
+  else bgmAudio.pause();
+  bgmOn = false; musicBtn.classList.remove('on');
+}
+musicBtn.addEventListener('click',()=>{ bgmOn ? bgmStop() : bgmPlay(); });
 
 /* ══════════════════════════════════════════════════════
    6. 캐릭터 스탠딩 전환 + 편지
@@ -744,19 +820,21 @@ document.addEventListener('keydown',e=>{
    ══════════════════════════════════════════════════════ */
 const player = new Audio();                        // mp3용
 player.volume = .8;
-const lp = document.getElementById('lp');
-let curTrack = -1, playing = false;
+const lp   = document.getElementById('lp');
+const ctrl = document.querySelector('.ctrl');
+const fill = document.getElementById('fill');
+const bar  = document.getElementById('bar');
+const tCur = document.getElementById('tCur');
+const tDur = document.getElementById('tDur');
+const icPlay = document.getElementById('icPlay');
+const icPause= document.getElementById('icPause');
+const btnRepeat = document.getElementById('btnRepeat');
 
-function syncTracks(i){
-  playing = i>=0;
-  document.querySelectorAll('.tracks li').forEach(li=>{
-    li.classList.toggle('on', Number(li.dataset.i)===i);
-  });
-  lp.classList.toggle('play', playing);
-}
+let curTrack = -1, playing = false, repeatMode = 'all';   // all → one → off
 
-/* ── 유튜브 플레이어 ── */
+/* ── 유튜브 플레이어 2개 (배경음악용 / 플레이리스트용) ── */
 let yt = null, ytReady = false, ytPending = null;
+let ytBgm = null, ytBgmReady = false, bgmWanted = false;
 (function(){
   const s = document.createElement('script');
   s.src = 'https://www.youtube.com/iframe_api';
@@ -768,43 +846,139 @@ window.onYouTubeIframeAPIReady = function(){
     playerVars:{autoplay:0,controls:0,playsinline:1,rel:0},
     events:{
       onReady:()=>{ ytReady = true; yt.setVolume(80);
-        if(ytPending!==null){ const p=ytPending; ytPending=null; play(p); } },
+        if(ytPending!==null){ const p = ytPending; ytPending = null; play(p); } },
       onStateChange:e=>{
-        if(e.data===YT.PlayerState.ENDED)  play((curTrack+1)%TRACKS.length);
-        if(e.data===YT.PlayerState.PLAYING) syncTracks(curTrack);
-        if(e.data===YT.PlayerState.PAUSED)  lp.classList.remove('play');
+        if(e.data===YT.PlayerState.ENDED)   onEnded();
+        if(e.data===YT.PlayerState.PLAYING) setPlaying(true);
+        if(e.data===YT.PlayerState.PAUSED)  setPlaying(false);
       }
+    }
+  });
+  ytBgm = new YT.Player('ytBgmFrame',{
+    height:'135', width:'240', videoId:'',
+    playerVars:{autoplay:0,controls:0,playsinline:1,rel:0},
+    events:{
+      onReady:()=>{ ytBgmReady = true; ytBgm.setVolume(55);
+        if(bgmWanted){ bgmWanted = false; ytBgm.loadVideoById(BGM_YT); } },
+      onStateChange:e=>{ if(e.data===YT.PlayerState.ENDED) ytBgm.seekTo(0), ytBgm.playVideo(); }
     }
   });
 };
 
-function stopAll(){
+/* ── 재생 상태 표시 ── */
+function markList(i){
+  document.querySelectorAll('.tracks li').forEach(li=>{
+    li.classList.toggle('on', Number(li.dataset.i)===i);
+  });
+}
+function setPlaying(on){
+  playing = on;
+  lp.classList.toggle('play', on);
+  ctrl.classList.toggle('playing', on);
+  icPlay.style.display  = on ? 'none' : '';
+  icPause.style.display = on ? '' : 'none';
+}
+function usingYT(){ return curTrack>=0 && !!TRACKS[curTrack].yt; }
+
+/* ── 재생 / 정지 ── */
+function stopTrack(){
   player.pause();
   if(ytReady && yt.pauseVideo) yt.pauseVideo();
+  setPlaying(false);
 }
 function play(i){
   const tr = TRACKS[i];
-  bgm.pause(); musicBtn.classList.remove('on');    // 배경음악과 겹치지 않게
+  if(!tr) return;
+  bgmStop();                                       // 배경음악과 겹치지 않게
   curTrack = i;
-  if(tr.yt){                                       // 유튜브 재생
+  markList(i);
+  if(tr.yt){
     player.pause();
-    if(!ytReady){ ytPending = i; syncTracks(i); return; }
+    if(!ytReady){ ytPending = i; return; }
     yt.loadVideoById(tr.yt);
-  }else{                                           // mp3 재생
+  }else{
     if(ytReady && yt.pauseVideo) yt.pauseVideo();
     player.src = tr.src;
     player.play().catch(()=>{});
   }
-  syncTracks(i);
+  setPlaying(true);
 }
+function toggle(){
+  if(curTrack<0){ play(0); return; }
+  if(playing){
+    if(usingYT()) yt.pauseVideo(); else player.pause();
+    setPlaying(false);
+  }else{
+    bgmStop();
+    if(usingYT()) yt.playVideo(); else player.play().catch(()=>{});
+    setPlaying(true);
+  }
+}
+function step(dir){
+  const n = TRACKS.length;
+  play(((curTrack<0?0:curTrack) + dir + n) % n);
+}
+function onEnded(){
+  if(repeatMode==='one'){ play(curTrack); return; }          // 한 곡 반복
+  const last = curTrack === TRACKS.length-1;
+  if(last && repeatMode==='off'){ setPlaying(false); return; } // 마지막 곡에서 정지
+  step(1);
+}
+player.addEventListener('ended', onEnded);
 
+/* ── 목록 · 버튼 ── */
 document.getElementById('tracks').addEventListener('click',e=>{
   const li = e.target.closest('li'); if(!li) return;
   const i = Number(li.dataset.i);
-  if(curTrack===i && playing){ stopAll(); syncTracks(-1); return; }   // 같은 곡 다시 → 정지
+  if(curTrack===i){ toggle(); return; }             // 같은 곡 다시 → 재생/멈추기
   play(i);
 });
-player.addEventListener('ended',()=>play((curTrack+1)%TRACKS.length));
+document.getElementById('btnPlay').addEventListener('click', toggle);
+document.getElementById('btnPrev').addEventListener('click',()=>step(-1));
+document.getElementById('btnNext').addEventListener('click',()=>step(1));
+btnRepeat.addEventListener('click',()=>{
+  repeatMode = repeatMode==='all' ? 'one' : repeatMode==='one' ? 'off' : 'all';
+  btnRepeat.classList.toggle('on',  repeatMode!=='off');
+  btnRepeat.classList.toggle('one', repeatMode==='one');
+  btnRepeat.title = '반복 : ' + (repeatMode==='all'?'전체':repeatMode==='one'?'한 곡':'없음');
+});
+btnRepeat.classList.add('on');                      // 기본값 : 전체 반복
+
+/* ── 시간 바 ── */
+function fmt(s){
+  if(!isFinite(s)||s<0) s = 0;
+  return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
+}
+function nowInfo(){
+  if(usingYT() && ytReady && yt.getDuration)
+    return {t:yt.getCurrentTime()||0, d:yt.getDuration()||0};
+  return {t:player.currentTime||0, d:player.duration||0};
+}
+setInterval(()=>{
+  if(curTrack<0) return;
+  const {t,d} = nowInfo();
+  fill.style.width = d ? (t/d*100)+'%' : '0%';
+  tCur.textContent = fmt(t);
+  tDur.textContent = fmt(d);
+},250);
+
+function seekAt(e){
+  if(curTrack<0) return;
+  const r = bar.getBoundingClientRect();
+  const p = Math.min(Math.max((e.clientX - r.left)/r.width, 0), 1);
+  const {d} = nowInfo();
+  if(!d) return;
+  if(usingYT()) yt.seekTo(d*p, true); else player.currentTime = d*p;
+  fill.style.width = (p*100)+'%';
+}
+bar.addEventListener('pointerdown',e=>{
+  seekAt(e); bar.setPointerCapture(e.pointerId);
+  const move = ev=>seekAt(ev);
+  const up = ()=>{ bar.removeEventListener('pointermove',move);
+                   bar.removeEventListener('pointerup',up); };
+  bar.addEventListener('pointermove',move);
+  bar.addEventListener('pointerup',up);
+});
 </script>
 </body>
 </html>
