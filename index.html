@@ -5,6 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>우리가 빠진 호수 · Our Page</title>
 
+<!-- ═══ 탭 아이콘 (지구본 자리) ═══
+     favicon.png 를 index.html 과 같은 폴더에 넣으세요. 정사각형 png 권장 -->
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
+
+<!-- ═══ 링크 공유 미리보기 (카톡 · 디스코드 · 트위터) ═══
+     ★ 아래 두 곳의 주소를 본인 깃허브 주소로 바꿔주세요.
+       예) https://huchu.github.io/ourpage/preview.png
+     ★ 미리보기 이미지는 가로로 긴 1200 x 630 크기가 가장 예쁘게 나옵니다. -->
+<meta property="og:type"        content="website">
+<meta property="og:title"       content="우리가 빠진 호수">
+<meta property="og:description" content="𝑶𝒖𝒓 𝑷𝒂𝒈𝒆 · 서호수 그리고 안자희">
+<meta property="og:image"       content="https://아이디.github.io/저장소이름/preview.png">
+<meta property="og:url"         content="https://아이디.github.io/저장소이름/">
+<meta name="twitter:card"       content="summary_large_image">
+<meta name="twitter:image"      content="https://아이디.github.io/저장소이름/preview.png">
+
 <!-- ── 폰트 ────────────────────────────────────────────── -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -600,10 +617,12 @@ const TIMELINE = [
    yt  : 유튜브 주소 youtube.com/watch?v=●●●●●●● 에서 v= 뒤의 11자리를 넣으세요.
          (예: yt:'dQw4w9WgXcQ')  → 유튜브에서 소리가 재생됩니다.
    src : 유튜브 대신 mp3 파일을 쓰고 싶을 때만 파일명을 넣으세요.
-         yt가 비어 있으면 src를 재생합니다.                                   */
+         yt가 비어 있으면 src를 재생합니다.
+   end : 곡을 중간에서 끝내고 싶을 때 '초'로 적으세요. (5분 20초 = 320)
+   start : 앞부분을 건너뛰고 싶을 때 '초'로 적으세요. 둘 다 없어도 됩니다.      */
 const TRACKS = [
   {t:'Appasionato',                  by:'Yuhki Kuramoto',            yt:'_fnV6f2ed-I', src:''},
-  {t:'Air on the G String',          by:'Johann Sebastian Bach',     yt:'1PkD47rNkfY', src:''},
+  {t:'Air on the G String',          by:'Johann Sebastian Bach',     yt:'1PkD47rNkfY', src:'', end:320},
   {t:'The Spruce, Op. 75 No. 5',     by:'Jean Sibelius',             yt:'rdgCDct__Wk', src:''},
   {t:'Im wunderschönen Monat Mai',   by:'Robert Alexander Schumann', yt:'p6zTlze74Sk', src:''},
   {t:"Hymne à l'amour",              by:'Édith Piaf',                yt:'nzxJtqKQ8Mo', src:''}
@@ -837,6 +856,7 @@ const icPause= document.getElementById('icPause');
 const btnRepeat = document.getElementById('btnRepeat');
 
 let curTrack = -1, playing = false, repeatMode = 'all';   // all → one → off
+let endLock = false;                                     // end 지점 중복 실행 방지
 
 /* ── 유튜브 플레이어 2개 (배경음악용 / 플레이리스트용) ── */
 let yt = null, ytReady = false, ytPending = null;
@@ -898,13 +918,15 @@ function play(i){
   bgmStop();                                       // 배경음악과 겹치지 않게
   curTrack = i;
   markList(i);
+  endLock = false;
   if(tr.yt){
     player.pause();
     if(!ytReady){ ytPending = i; return; }
-    yt.loadVideoById(tr.yt);
+    yt.loadVideoById({videoId:tr.yt, startSeconds:tr.start||0});
   }else{
     if(ytReady && yt.pauseVideo) yt.pauseVideo();
     player.src = tr.src;
+    if(tr.start) player.currentTime = tr.start;
     player.play().catch(()=>{});
   }
   setPlaying(true);
@@ -962,18 +984,27 @@ function nowInfo(){
 }
 setInterval(()=>{
   if(curTrack<0) return;
-  const {t,d} = nowInfo();
-  fill.style.width = d ? (t/d*100)+'%' : '0%';
+  const tr = TRACKS[curTrack];
+  let {t,d} = nowInfo();
+  if(tr.end) d = tr.end;                           // 지정한 지점을 끝으로 취급
+  fill.style.width = d ? Math.min(t/d*100,100)+'%' : '0%';
   tCur.textContent = fmt(t);
   tDur.textContent = fmt(d);
+  if(tr.end && playing && !endLock && t >= tr.end - 0.3){
+    endLock = true;                                // 지정 지점에서 다음 곡으로
+    onEnded();
+  }
 },250);
 
 function seekAt(e){
   if(curTrack<0) return;
   const r = bar.getBoundingClientRect();
   const p = Math.min(Math.max((e.clientX - r.left)/r.width, 0), 1);
-  const {d} = nowInfo();
+  let {d} = nowInfo();
+  const tr = TRACKS[curTrack];
+  if(tr && tr.end) d = tr.end;
   if(!d) return;
+  endLock = false;
   if(usingYT()) yt.seekTo(d*p, true); else player.currentTime = d*p;
   fill.style.width = (p*100)+'%';
 }
