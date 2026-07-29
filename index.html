@@ -79,7 +79,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 
 /* ── 고정 배경 ───────────────────────────────────────── */
 .bg{position:fixed;inset:0;z-index:0;
-  background:url('mainphoto.png') center/cover no-repeat;
+  background:url('MAINPHOTO.png') center/cover no-repeat;
   transform:scale(1.04);
 }
 .veil{position:fixed;inset:0;z-index:1;background:#000;
@@ -156,9 +156,12 @@ section.tall{scroll-snap-stop:normal}
 
 /* ═══════════ 3. PROFILE ═══════════ */
 .profile{padding:0}
-.stage{width:100%;max-width:1500px;display:grid;
-  grid-template-columns:1fr 1.05fr 1.05fr 1fr;
-  align-items:end;gap:0;height:100vh}
+.stage{width:100%;max-width:1080px;display:grid;
+  grid-template-columns:1fr 1fr;
+  align-items:center;gap:0;height:100vh;position:relative}
+/* 두 사람 사이의 가는 빛줄기 */
+.stage::before{content:'';position:absolute;left:50%;top:24vh;bottom:24vh;width:1px;
+  background:linear-gradient(to bottom,transparent,rgba(255,255,255,.32),transparent)}
 
 .stand{position:relative;height:76vh;align-self:end;cursor:pointer}
 .stand img{width:100%;height:100%;object-fit:cover;object-position:50% 0%;
@@ -169,10 +172,11 @@ section.tall{scroll-snap-stop:normal}
 .stand.n::after{background:var(--noah)}
 .stand.a::after{background:var(--apo)}
 
-.card{padding:14vh clamp(14px,2.2vw,34px) 12vh;align-self:stretch;text-align:left;
-  display:flex;flex-direction:column;justify-content:flex-end;
+.card{padding:14vh clamp(20px,3.4vw,54px);align-self:stretch;text-align:center;
+  display:flex;flex-direction:column;justify-content:center;
   position:relative;cursor:pointer}
-.card.a{text-align:right}
+.card .face{width:100%}
+.spec li{justify-content:center}
 .card .tag{font-family:var(--lat);font-size:12px;letter-spacing:.4em;color:var(--mist,rgba(255,255,255,.62))}
 .card h2{font-family:var(--lat);font-weight:300;font-size:clamp(30px,3.6vw,52px);
   letter-spacing:.16em;margin:6px 0 18px}
@@ -186,9 +190,10 @@ section.tall{scroll-snap-stop:normal}
 .spec span{flex:1 1 auto;min-width:0}
 .swatch{display:inline-block;width:9px;height:9px;border-radius:50%;
   vertical-align:middle;margin-left:2px;transform:translateY(-1px)}
-.card blockquote{margin:20px 0 24px;font-family:var(--disp);font-size:13.5px;line-height:1.95;
-  color:rgba(255,255,255,.92);border-left:1px solid rgba(255,255,255,.3);padding-left:14px}
-.card.a blockquote{border-left:0;border-right:1px solid rgba(255,255,255,.3);padding:0 14px 0 0}
+.card blockquote{margin:26px auto 0;max-width:32ch;padding-top:22px;position:relative;
+  font-family:var(--disp);font-size:13.5px;line-height:1.95;color:rgba(255,255,255,.92)}
+.card blockquote::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:36px;height:1px;background:rgba(255,255,255,.35)}
 /* 프로필 카드는 클릭하면 편지가 열립니다 (호버 시 살짝 반응) */
 .card .face{transform:translateY(0)}
 .card:hover .face{transform:translateY(-4px)}
@@ -206,7 +211,7 @@ section.tall{scroll-snap-stop:normal}
   -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 7%,#000 93%,transparent 100%);
           mask-image:linear-gradient(to bottom,transparent 0,#000 7%,#000 93%,transparent 100%)}
 /* 편지 안쪽 — 짧으면 가운데, 길면 위에서부터 시작하며 스크롤됩니다 */
-.note-inner{margin:auto 0;width:100%;display:flex;flex-direction:column;user-select:text}
+.note-inner{margin:auto 0;width:100%;display:flex;flex-direction:column;user-select:text;text-align:left}
 /* 편지 스크롤바 */
 .note{scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.42) rgba(255,255,255,.08)}
 .note::-webkit-scrollbar{width:4px}
@@ -226,7 +231,6 @@ section.tall{scroll-snap-stop:normal}
   text-shadow:0 0 16px rgba(0,0,0,.85),0 0 40px rgba(0,0,0,.6)}
 .back{align-self:flex-start;margin-top:34px;font-family:var(--lat);
   font-size:11.5px;letter-spacing:.32em;color:var(--mist,rgba(255,255,255,.62))}
-.card.a .back{align-self:flex-end}
 .back:hover{color:#fff;text-shadow:var(--glow-w)}
 
 /* ═══════════ 4. TIMELINE ═══════════ */
@@ -349,11 +353,10 @@ footer .mini{margin-top:12px;font-family:var(--body);font-size:11px;
 /* ═══════════ 반응형 ═══════════ */
 @media (max-width:900px){
   .scroller{scroll-snap-type:y proximity}
-  .stage{grid-template-columns:1fr 1fr;grid-template-areas:"sn sa" "cn ca";
-    height:auto;padding:14vh 0 8vh;gap:0 10px;align-items:end}
-  .stand{height:34vh}.stand.n{grid-area:sn}.stand.a{grid-area:sa}
-  .card{padding:22px 14px 0}
-  .note{padding:4vh 10px 4vh 0}.card.n{grid-area:cn}.card.a{grid-area:ca}
+  .stage{grid-template-columns:1fr;height:auto;padding:12vh 0 10vh;gap:9vh}
+  .stage::before{display:none}
+  .card{padding:0 16px}
+  .note{padding:4vh 10px 4vh 0}
   .row{grid-template-columns:14px 1fr;gap:0 18px}
   .line::before{left:7px}
   .row .dot{justify-self:start;grid-column:1}
@@ -405,11 +408,6 @@ footer .mini{margin-top:12px;font-family:var(--body);font-size:11px;
   <!-- ═══ 2. 두번째 장면 · 프로필 ═══ -->
   <section class="profile" id="profile" data-veil=".55">
     <div class="stage">
-
-      <!-- 캐릭터1 전신 -->
-      <div class="stand n" data-who="noah">
-        <img id="standNoah" src="NOAHFULLBODY1.png" alt="서호수">
-      </div>
 
       <!-- 캐릭터1 정보 -->
       <div class="card n rise" data-who="noah">
@@ -475,11 +473,6 @@ footer .mini{margin-top:12px;font-family:var(--body);font-size:11px;
 그러니 이제 혼자 아파하지 말아요, 호수씨. 당신의 곁에는 내가 있으니까요. 당신의 슬픔도, 기쁨도, 모든 것을 함께 나누고 싶어요. 당신이 나를 살렸다고 말했지만, 사실은 당신이 나를 살게 한 겁니다. 당신이라는 사람을 만나, 비로소 나의 세상도 의미를 갖게 되었으니까요.</p>
           <button class="back">← BACK</button>
         </div>
-      </div>
-
-      <!-- 캐릭터2 전신 -->
-      <div class="stand a" data-who="apo">
-        <img id="standApo" src="APOPHISFULLBODY1.png" alt="안자희">
       </div>
 
     </div>
@@ -780,12 +773,13 @@ musicBtn.addEventListener('click',()=>{ bgmOn ? bgmStop() : bgmPlay(); });
    6. 캐릭터 스탠딩 전환 + 편지
    ══════════════════════════════════════════════════════ */
 Object.values(STANDS).forEach(s=>{                // 미리 불러오기(깜빡임 방지)
+  if(!s.el) return;                              // 전신 일러를 안 쓰면 건너뜁니다
   [s.hover,s.letter].forEach(src=>{const i=new Image();i.src=src;});
 });
 const state = {noah:'base', apo:'base'};
 function paint(who){
   const s = STANDS[who];
-  if(!s.el) return;
+  if(!s || !s.el) return;
   s.el.src = s[state[who]];
 }
 document.querySelectorAll('.stand').forEach(st=>{
