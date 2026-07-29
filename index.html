@@ -317,7 +317,7 @@ section.tall{scroll-snap-stop:normal}
 #btnRepeat.one em{display:block}
 
 /* ═══════════ 6. ARCHIVE ═══════════ */
-.archive{padding:14vh 0 0;justify-content:center;gap:34px;overflow:hidden}
+.archive{padding:11vh 0 0;justify-content:flex-start;gap:26px;overflow:hidden}
 .arc-head{text-align:center;padding:0 6vw}
 .rail{width:100%;overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent);
         mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent)}
@@ -325,7 +325,7 @@ section.tall{scroll-snap-stop:normal}
 .rail.rev .track{animation-direction:reverse}
 .rail:hover .track{animation-play-state:paused}
 @keyframes slide{to{transform:translateX(-50%)}}
-.frame{position:relative;width:clamp(180px,17vw,250px);aspect-ratio:3/4;overflow:hidden;
+.frame{position:relative;width:clamp(160px,14.5vw,215px);aspect-ratio:3/4;overflow:hidden;
   border-radius:2px;background:rgba(255,255,255,.05);
   box-shadow:0 0 0 1px rgba(255,255,255,.12),0 0 30px rgba(0,0,0,.5);
   transition:box-shadow .5s var(--ease)}
@@ -339,8 +339,12 @@ section.tall{scroll-snap-stop:normal}
 .frame:hover .plate{transform:translateY(0)}
 .plate small{font-family:var(--lat);font-size:10px;letter-spacing:.34em;color:var(--mist,rgba(255,255,255,.62))}
 .plate strong{font-family:var(--disp);font-weight:400;font-size:15px;letter-spacing:.06em;margin-top:6px}
-footer{width:100%;text-align:center;padding:9vh 0 5vh;
-  font-family:var(--lat);font-size:11.5px;letter-spacing:.28em;color:rgba(255,255,255,.5)}
+footer{width:100%;text-align:center;padding:7vh 0 5vh;
+  font-family:var(--lat);font-size:11.5px;letter-spacing:.28em;color:rgba(255,255,255,.5);
+  scroll-snap-align:end}                      /* 페이지 맨 아래까지 내려가게 하는 지점 */
+footer p{color:rgba(255,255,255,.5)}
+footer .mini{margin-top:12px;font-family:var(--body);font-size:11px;
+  letter-spacing:.04em;line-height:1.8;color:rgba(255,255,255,.36)}
 
 /* ═══════════ 반응형 ═══════════ */
 @media (max-width:900px){
@@ -548,7 +552,10 @@ footer{width:100%;text-align:center;padding:9vh 0 5vh;
       <div class="track" id="railMY"></div>
     </div>
 
-    <footer>© 2026. huchu All rights reserved.</footer>
+    <footer>
+      <p>© 2026. huchu All rights reserved.</p>
+      <p class="mini">이 페이지는 개인적인 기록을 위한 비영리 공간이며, 어떠한 수익도 창출하지 않습니다.</p>
+    </footer>
   </section>
 
 </div>
@@ -606,22 +613,21 @@ const TIMELINE = [
    src : 유튜브 대신 mp3 파일을 쓰고 싶을 때만 파일명을 넣으세요.
          yt가 비어 있으면 src를 재생합니다.                                   */
 const TRACKS = [
-  {t:'Appasionato',                  by:'Yuhki Kuramoto',            yt:'', src:'TRACK1.mp3'},
-  {t:'Air on the G String',          by:'Johann Sebastian Bach',     yt:'', src:'TRACK2.mp3'},
-  {t:'The Spruce, Op. 75 No. 5',     by:'Jean Sibelius',             yt:'', src:'TRACK3.mp3'},
-  {t:'Im wunderschönen Monat Mai',   by:'Robert Alexander Schumann', yt:'', src:'TRACK4.mp3'},
-  {t:"Hymne à l'amour",              by:'Édith Piaf',                yt:'', src:'TRACK5.mp3'}
+  {t:'Appasionato',                  by:'Yuhki Kuramoto',            yt:'_fnV6f2ed-I', src:''},
+  {t:'Air on the G String',          by:'Johann Sebastian Bach',     yt:'1PkD47rNkfY', src:''},
+  {t:'The Spruce, Op. 75 No. 5',     by:'Jean Sibelius',             yt:'rdgCDct__Wk', src:''},
+  {t:'Im wunderschönen Monat Mai',   by:'Robert Alexander Schumann', yt:'p6zTlze74Sk', src:''},
+  {t:"Hymne à l'amour",              by:'Édith Piaf',                yt:'nzxJtqKQ8Mo', src:''}
 ];
 
 /* 커미션 6장 — artist에 작가 이름을 넣어주세요 */
 const CM = [
-  {img:'CM1.png', artist:'팔공칠'},
-  {img:'CM2.png', artist:'기오'},
-  {img:'CM3.png', artist:'광자'},
-  {img:'CM4.png', artist:'유리'},
-  {img:'CM5.png', artist:'파도'},
-  {img:'CM6.png', artist:'키키'},
-  {img:'CM7.png', artist:'이베리코'}
+  {img:'CM1.png', artist:'작가명 01'},
+  {img:'CM2.png', artist:'작가명 02'},
+  {img:'CM3.png', artist:'작가명 03'},
+  {img:'CM4.png', artist:'작가명 04'},
+  {img:'CM5.png', artist:'작가명 05'},
+  {img:'CM6.png', artist:'작가명 06'}
 ];
 const MY = ['MYART1.png','MYART2.png','MYART3.png','MYART4.png','MYART5.png'];
 
