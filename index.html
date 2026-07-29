@@ -321,15 +321,16 @@ section.tall{scroll-snap-stop:normal}
 #btnRepeat.one em{display:block}
 
 /* ═══════════ 6. ARCHIVE ═══════════ */
-.archive{padding:11vh 0 0;justify-content:flex-start;gap:26px;overflow:hidden}
+.archive{padding:13vh 0 0;justify-content:flex-start;gap:40px;overflow:hidden}
 .arc-head{text-align:center;padding:0 6vw}
 .rail{width:100%;overflow:hidden;-webkit-mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent);
         mask-image:linear-gradient(to right,transparent,#000 8%,#000 92%,transparent)}
-.track{display:flex;gap:20px;width:max-content;animation:slide linear infinite}
+.track{display:flex;width:max-content;animation:slide linear infinite;
+  will-change:transform;backface-visibility:hidden}
 .rail.rev .track{animation-direction:reverse}
 .rail:hover .track{animation-play-state:paused}
-@keyframes slide{to{transform:translateX(-50%)}}
-.frame{position:relative;width:clamp(160px,14.5vw,215px);aspect-ratio:3/4;overflow:hidden;
+@keyframes slide{to{transform:translateX(calc(-1 * var(--setw,50%)))}}
+.frame{position:relative;margin-right:20px;width:clamp(190px,17vw,265px);aspect-ratio:3/4;overflow:hidden;
   border-radius:2px;background:rgba(255,255,255,.05);
   box-shadow:0 0 0 1px rgba(255,255,255,.12),0 0 30px rgba(0,0,0,.5);
   transition:box-shadow .5s var(--ease)}
@@ -343,7 +344,7 @@ section.tall{scroll-snap-stop:normal}
 .frame:hover .plate{transform:translateY(0)}
 .plate small{font-family:var(--lat);font-size:10px;letter-spacing:.34em;color:var(--mist,rgba(255,255,255,.62))}
 .plate strong{font-family:var(--disp);font-weight:400;font-size:15px;letter-spacing:.06em;margin-top:6px}
-footer{width:100%;text-align:center;padding:7vh 0 5vh;
+footer{width:100%;text-align:center;padding:7vh 0 5vh;margin-top:auto;
   font-family:var(--lat);font-size:11.5px;letter-spacing:.28em;color:rgba(255,255,255,.5);
   scroll-snap-align:end}                      /* 페이지 맨 아래까지 내려가게 하는 지점 */
 footer p{color:rgba(255,255,255,.5)}
@@ -535,14 +536,9 @@ footer .mini{margin-top:12px;font-family:var(--body);font-size:11px;
       <h2 style="font-family:var(--disp);font-weight:400;font-size:clamp(24px,3vw,36px);letter-spacing:.2em;margin-top:12px;text-shadow:var(--glow-w)">모아둔 순간들</h2>
     </div>
 
-    <!-- 첫번째 줄 : 커미션 -->
-    <div class="rail fade" data-speed="46">
+    <!-- 커미션 -->
+    <div class="rail fade" data-speed="52">
       <div class="track" id="railCM"></div>
-    </div>
-
-    <!-- 두번째 줄 : 내 그림 -->
-    <div class="rail rev fade" data-speed="40">
-      <div class="track" id="railMY"></div>
     </div>
 
     <footer>
@@ -613,16 +609,16 @@ const TRACKS = [
   {t:"Hymne à l'amour",              by:'Édith Piaf',                yt:'nzxJtqKQ8Mo', src:''}
 ];
 
-/* 커미션 6장 — artist에 작가 이름을 넣어주세요 */
+/* 커미션 — 그림 파일과 작가 이름 */
 const CM = [
-  {img:'CM1.png', artist:'작가명 01'},
-  {img:'CM2.png', artist:'작가명 02'},
-  {img:'CM3.png', artist:'작가명 03'},
-  {img:'CM4.png', artist:'작가명 04'},
-  {img:'CM5.png', artist:'작가명 05'},
-  {img:'CM6.png', artist:'작가명 06'}
+  {img:'CM1.png', artist:'팔공칠'},
+  {img:'CM2.png', artist:'기오'},
+  {img:'CM3.png', artist:'광자'},
+  {img:'CM4.png', artist:'유리'},
+  {img:'CM5.png', artist:'파도'},
+  {img:'CM6.png', artist:'키키'},
+  {img:'CM7.png', artist:'이베리코도둑'}
 ];
-const MY = ['MYART1.png','MYART2.png','MYART3.png','MYART4.png','MYART5.png'];
 
 /* ══════════════════════════════════════════════════════
    1. D-DAY
@@ -675,22 +671,31 @@ const MY = ['MYART1.png','MYART2.png','MYART3.png','MYART4.png','MYART5.png'];
     ul.appendChild(li);
   });
 
-  const cm = document.getElementById('railCM');
-  const my = document.getElementById('railMY');
   const cmHTML = CM.map(c=>`<figure class="frame">
-      <img src="${c.img}" alt="commission" loading="lazy">
+      <img src="${c.img}" alt="commission">
       <figcaption class="plate"><small>ARTIST</small><strong>${c.artist}</strong></figcaption>
     </figure>`).join('');
-  const myHTML = MY.map((m,i)=>`<figure class="frame">
-      <img src="${m}" alt="my art" loading="lazy">
-      <figcaption class="plate"><small>DRAWN BY</small><strong>huchu</strong></figcaption>
-    </figure>`).join('');
-  cm.innerHTML = cmHTML + cmHTML;                // 끊김 없는 무한 루프용 복제
-  my.innerHTML = myHTML + myHTML;
 
-  document.querySelectorAll('.rail').forEach(r=>{
-    r.querySelector('.track').style.animationDuration = (r.dataset.speed||44)+'s';
-  });
+  /* 한 세트의 정확한 폭을 재서, 딱 그만큼만 흐르게 합니다 (이음매가 안 보임)
+     + 화면을 다 덮을 만큼 복제해서 빈 구간이 생기지 않게 합니다        */
+  function buildRail(rail, html){
+    const track = rail.querySelector('.track');
+    track.style.animation = 'none';
+    track.innerHTML = html;
+    const setW = track.getBoundingClientRect().width;
+    if(!setW) return;
+    const copies = Math.max(2, Math.ceil((window.innerWidth + setW) / setW) + 1);
+    track.innerHTML = html.repeat(copies);
+    track.style.setProperty('--setw', setW + 'px');
+    track.style.animation = '';
+    track.style.animationDuration = (rail.dataset.speed || 48) + 's';
+  }
+  function buildAll(){
+    document.querySelectorAll('.rail').forEach(r=>buildRail(r, cmHTML));
+  }
+  buildAll();
+  window.addEventListener('load', buildAll);      // 이미지 로드 후 폭 재측정
+  let rz; window.addEventListener('resize',()=>{ clearTimeout(rz); rz = setTimeout(buildAll,250); });
 })();
 
 /* ══════════════════════════════════════════════════════
